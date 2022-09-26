@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ume/flutter_ume.dart';
 import 'icon.dart' as icon;
+import 'widget/performance_observer_widget.dart';
 
 class Performance extends StatelessWidget implements Pluggable {
   @override
@@ -9,7 +10,15 @@ class Performance extends StatelessWidget implements Pluggable {
         alignment: Alignment.topCenter,
         margin: const EdgeInsets.only(top: 20),
         child: SizedBox(
-            child: PerformanceOverlay.allEnabled(),
+            child: Stack(
+              children: [
+                PerformanceOverlay.allEnabled(),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: PerformanceObserverWidget(),
+                ),
+              ],
+            ),
             width: MediaQuery.of(context).size.width));
   }
 
