@@ -12,7 +12,6 @@ class PerformanceObserverWidget extends StatefulWidget {
   const PerformanceObserverWidget({Key? key}) : super(key: key);
 
   @override
-
   _PerformanceObserverWidgetState createState() => _PerformanceObserverWidgetState();
 }
 
@@ -20,14 +19,12 @@ class _PerformanceObserverWidgetState extends State<PerformanceObserverWidget> {
   bool startRecording = false;
   bool fpsPageShowing = false;
 
-  late ValueNotifier controller;
   late Function(List<FrameTiming>) monitor;
   OverlayEntry? fpsInfoPage;
 
   @override
   void initState() {
     super.initState();
-    controller = ValueNotifier("");
     monitor = (timings) {
       double duration = 0;
       timings.forEach((element) {
@@ -38,11 +35,16 @@ class _PerformanceObserverWidgetState extends State<PerformanceObserverWidget> {
         CommonStorage.instance!.save(fpsInfo);
       });
     };
+    Future.delayed(Duration(milliseconds: 200), () => fpsMonitor());
   }
 
   @override
   void dispose() {
     stop();
+    startRecording = false;
+    CommonStorage.instance!.clear();
+    // fpsInfoPage!.remove();
+    // fpsPageShowing = false;
     super.dispose();
   }
 
@@ -56,54 +58,28 @@ class _PerformanceObserverWidgetState extends State<PerformanceObserverWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        GestureDetector(
-          child: RepaintBoundary(
-            child: ValueListenableBuilder(
-                valueListenable: controller,
-                builder: (context, dynamic snapshot, _) {
-                  return Container(
-                    color: Colors.transparent,
-                    child: !startRecording
-                        ? Row(
-                            children: [
-                              Text('Start Record',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic)),
-                              Icon(
-                                Icons.play_arrow,
-                                color: Colors.red,
-                              )
-                            ],
-                          )
-                        : fpsPageShowing
-                            ? Row()
-                            : Row(
-                                children: <Widget>[
-                                  Text('Recording, Click to scan',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle: FontStyle.italic)),
-                                  Icon(
-                                    Icons.pause,
-                                    color: Colors.red,
-                                  )
-                                ],
-                              ),
-                  );
-                }),
+    return GestureDetector(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PerformanceOverlay.allEnabled(),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              'Click To Scan Record',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ),
-          onTap: () {
-            fpsMonitor();
-          },
-        )
-      ],
+        ],
+      ),
+      onTap: () {
+        fpsMonitor();
+      },
     );
   }
 
@@ -112,7 +88,6 @@ class _PerformanceObserverWidgetState extends State<PerformanceObserverWidget> {
       setState(() {
         start();
         startRecording = true;
-        controller.value = startRecording;
       });
     } else {
       if (!fpsPageShowing) {
@@ -123,39 +98,24 @@ class _PerformanceObserverWidgetState extends State<PerformanceObserverWidget> {
               body: Column(
                 children: <Widget>[
                   Expanded(
-                      child: GestureDetector(
-                    onTap: () {
-                      fpsInfoPage!.remove();
-                      fpsPageShowing = false;
-                      start();
-                    },
-                    child: Container(
-                      color: Color(0x33999999),
+                    child: GestureDetector(
+                      onTap: () {
+                        fpsInfoPage!.remove();
+                        fpsPageShowing = false;
+                        start();
+                      },
+                      child: Container(
+                        color: Color(0x33999999),
+                      ),
                     ),
-                  )),
+                  ),
                   Container(
                       color: Colors.white,
                       child: Column(
                         children: <Widget>[
                           FpsPage(),
-                          Divider(),
-                          Container(
-                            padding: const EdgeInsets.only(left: 20, top: 20, bottom: 20),
-                            child: GestureDetector(
-                              child: Text(
-                                'Stop',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              onTap: () {
-                                startRecording = false;
-                                fpsInfoPage!.remove();
-                                fpsPageShowing = false;
-                                CommonStorage.instance!.clear();
-                                controller.value = startRecording;
-                                // setState(() {});
-                              },
-                            ),
-                            alignment: Alignment.bottomLeft,
+                          SizedBox(
+                            height: 20,
                           ),
                         ],
                       )),

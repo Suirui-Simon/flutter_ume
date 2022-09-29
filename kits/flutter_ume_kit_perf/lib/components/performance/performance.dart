@@ -10,15 +10,7 @@ class Performance extends StatelessWidget implements Pluggable {
         alignment: Alignment.topCenter,
         margin: const EdgeInsets.only(top: 20),
         child: SizedBox(
-            child: Stack(
-              children: [
-                PerformanceOverlay.allEnabled(),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                  child: PerformanceObserverWidget(),
-                ),
-              ],
-            ),
+            child: PerformanceObserverWidget(),
             width: MediaQuery.of(context).size.width));
   }
 
